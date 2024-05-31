@@ -1,6 +1,7 @@
 package com.knat.pterodactylcommandsmod;
 
 import com.mojang.logging.LogUtils;
+import net.minecraft.network.chat.Component;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
@@ -31,7 +32,10 @@ public class PterodactylCommandsMod {
     @SubscribeEvent
     public void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {
         if (!Config.isConfigValid()) {
-            LOGGER.error("Configuration is not set or invalid in the configuration file. Can not communicate with the Pterodactyl API.");
+            String message = "Configuration is not set or invalid in the configuration file. Can not communicate with the Pterodactyl API.";
+            LOGGER.error(message);
+            // send a message to the player
+            event.getEntity().displayClientMessage(Component.literal(message), false);
         }
     }
 }
