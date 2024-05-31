@@ -34,7 +34,6 @@ public class PterodactylCommandsMod {
         if (!Config.isConfigValid()) {
             String message = "Configuration is not set or invalid in the configuration file. Can not communicate with the Pterodactyl API.";
             LOGGER.error(message);
-            // send a message to the player
             event.getEntity().displayClientMessage(Component.literal(message), false);
         }
     }
