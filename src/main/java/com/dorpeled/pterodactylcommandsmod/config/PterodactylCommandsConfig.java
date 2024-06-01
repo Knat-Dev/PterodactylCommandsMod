@@ -1,6 +1,7 @@
 package com.dorpeled.pterodactylcommandsmod.config;
 
 import com.dorpeled.pterodactylcommandsmod.network.RestClient;
+import com.dorpeled.pterodactylcommandsmod.util.PterodactylUrlBuilder;
 import com.mojang.logging.LogUtils;
 import net.minecraftforge.common.ForgeConfigSpec;
 import org.slf4j.Logger;
@@ -20,30 +21,29 @@ public class PterodactylCommandsConfig {
 
     static {
         BUILDER.push("General");
-        BASE_URL = BUILDER.comment("Pterodactyl panel base url")
-                .define("baseUrl", "");
-        API_KEY = BUILDER.comment("API Key for the Backup Command")
-                .define("apiKey", "");
-        SERVER_ID = BUILDER.comment("The Pterodactyl server id")
-                .define("serverId", "");
+        BASE_URL = BUILDER.comment("Pterodactyl panel base url").define("baseUrl", "");
+        API_KEY = BUILDER.comment("API Key for the Backup Command").define("apiKey", "");
+        SERVER_ID = BUILDER.comment("The Pterodactyl server id").define("serverId", "");
         BUILDER.pop();
 
         config = BUILDER.build();
     }
 
     public static boolean validate() {
-        boolean isValid = validateBaseUrl(BASE_URL.get()) && validateApiKey(API_KEY.get()) && validateServerId(SERVER_ID.get());
-        // http request to validate the api key
+        boolean isValid = validateBaseUrl(BASE_URL.get()) &&
+                validateApiKey(API_KEY.get()) &&
+                validateServerId(SERVER_ID.get());
 
         if (isValid) {
-            // Construct the URL for the "Get server details" endpoint
-            String url = BASE_URL.get() + "/api/client/servers/" + SERVER_ID.get();
+            String url = PterodactylUrlBuilder.getInstance()
+                    .baseUrl(BASE_URL.get())
+                    .endpoint("/api/client/servers/")
+                    .param(SERVER_ID.get())
+                    .build();
 
             try {
-                // Send a GET request to the endpoint
                 HttpResponse<String> response = RestClient.sendGetRequest(url);
 
-                // If the status code is 200, the API key is valid
                 isValid = response.statusCode() == 200;
             } catch (Exception e) {
                 LOGGER.error("Validation of some configuration values failed. Please check your configuration file.");
