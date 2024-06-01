@@ -19,7 +19,7 @@ public class PterodactylCommandsConfig {
         API_KEY = BUILDER.comment("API Key for the Backup Command")
                 .define("apiKey", "");
         SERVER_ID = BUILDER.comment("The Pterodactyl server id")
-                .define("scheduleId", "");
+                .define("serverId", "");
         BUILDER.pop();
 
         config = BUILDER.build();
