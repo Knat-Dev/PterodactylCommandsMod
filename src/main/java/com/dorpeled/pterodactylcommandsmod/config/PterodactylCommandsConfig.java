@@ -29,50 +29,54 @@ public class PterodactylCommandsConfig {
         config = BUILDER.build();
     }
 
-    public static void validate() {
-        validateBaseUrl(BASE_URL.get());
-        validateApiKey(API_KEY.get());
-        validateServerId(SERVER_ID.get());
+    public static boolean validate() {
+        return validateBaseUrl(BASE_URL.get()) && validateApiKey(API_KEY.get()) && validateServerId(SERVER_ID.get());
     }
 
-    private static void validateBaseUrl(String baseUrl) {
+    public static boolean validateBaseUrl(String baseUrl) {
         if (baseUrl.isEmpty()) {
             LOGGER.error("Base URL is missing. Please check your configuration file.");
-            throw new IllegalStateException("Base URL is missing. Please check your configuration file.");
+            return false;
         }
 
         try {
             new URL(baseUrl);
         } catch (MalformedURLException e) {
             LOGGER.error("Base URL is not a valid URL. Please check your configuration file.");
-            throw new IllegalStateException("Base URL is not a valid URL. Please check your configuration file.", e);
+            return false;
         }
+
+        return true;
     }
 
-    private static void validateApiKey(String apiKey) {
+    public static boolean validateApiKey(String apiKey) {
         if (apiKey.isEmpty()) {
             LOGGER.error("API key is missing. Please check your configuration file.");
-            throw new IllegalStateException("API key is missing. Please check your configuration file.");
+            return false;
         }
 
-        String regex = "^ptlc_[a-zA-Z0-9]{40}$";
+        String regex = "^ptlc_[a-zA-Z0-9]{43}$";
         if (!apiKey.matches(regex)) {
             LOGGER.error("API key is not valid. Please check your configuration file.");
-            throw new IllegalStateException("API key is not valid. Please check your configuration file.");
+            return false;
         }
+
+        return true;
     }
 
-    private static void validateServerId(String serverId) {
+    public static boolean validateServerId(String serverId) {
         if (serverId.isEmpty()) {
             LOGGER.error("Server ID is missing. Please check your configuration file.");
-            throw new IllegalStateException("Server ID is missing. Please check your configuration file.");
+            return false;
         }
 
         try {
-            Integer.parseInt(serverId);
-        } catch (NumberFormatException e) {
-            LOGGER.error("Server ID is not a valid integer. Please check your configuration file.");
-            throw new IllegalStateException("Server ID is not a valid integer. Please check your configuration file.", e);
+            UUID uuid = UUID.fromString(serverId);
+        } catch (IllegalArgumentException e) {
+            LOGGER.error("Server ID is not a valid UUID. Please check your configuration file.");
+            return false;
         }
+
+        return true;
     }
 }
