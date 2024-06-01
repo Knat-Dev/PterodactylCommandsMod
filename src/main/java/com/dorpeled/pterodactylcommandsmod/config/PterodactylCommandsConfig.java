@@ -1,11 +1,13 @@
 package com.dorpeled.pterodactylcommandsmod.config;
 
+import com.dorpeled.pterodactylcommandsmod.network.RestClient;
 import com.mojang.logging.LogUtils;
 import net.minecraftforge.common.ForgeConfigSpec;
 import org.slf4j.Logger;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.http.HttpResponse;
 import java.util.UUID;
 
 public class PterodactylCommandsConfig {
@@ -30,7 +32,25 @@ public class PterodactylCommandsConfig {
     }
 
     public static boolean validate() {
-        return validateBaseUrl(BASE_URL.get()) && validateApiKey(API_KEY.get()) && validateServerId(SERVER_ID.get());
+        boolean isValid = validateBaseUrl(BASE_URL.get()) && validateApiKey(API_KEY.get()) && validateServerId(SERVER_ID.get());
+        // http request to validate the api key
+
+        if (isValid) {
+            // Construct the URL for the "Get server details" endpoint
+            String url = BASE_URL.get() + "/api/client/servers/" + SERVER_ID.get();
+
+            try {
+                // Send a GET request to the endpoint
+                HttpResponse<String> response = RestClient.sendGetRequest(url);
+
+                // If the status code is 200, the API key is valid
+                isValid = response.statusCode() == 200;
+            } catch (Exception e) {
+                LOGGER.error("Validation of some configuration values failed. Please check your configuration file.");
+                isValid = false;
+            }
+        }
+        return isValid;
     }
 
     public static boolean validateBaseUrl(String baseUrl) {
