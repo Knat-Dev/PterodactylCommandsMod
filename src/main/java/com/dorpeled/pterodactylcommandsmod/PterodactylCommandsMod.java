@@ -3,6 +3,7 @@ package com.dorpeled.pterodactylcommandsmod;
 import com.dorpeled.pterodactylcommandsmod.config.PterodactylCommandsConfig;
 import com.dorpeled.pterodactylcommandsmod.events.CommandEventHandler;
 import com.dorpeled.pterodactylcommandsmod.events.ConfigEventHandler;
+import com.dorpeled.pterodactylcommandsmod.events.OpAdminLoginHandler;
 import com.mojang.logging.LogUtils;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -23,6 +24,7 @@ public class PterodactylCommandsMod {
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, PterodactylCommandsConfig.config);
 
         MinecraftForge.EVENT_BUS.register(CommandEventHandler.class);
+        MinecraftForge.EVENT_BUS.register(OpAdminLoginHandler.class);
 
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
         modEventBus.register(new ConfigEventHandler());
