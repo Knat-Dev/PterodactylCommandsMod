@@ -64,6 +64,11 @@ public class ConfigCommands {
         }
 
         source.sendSuccess(() -> Component.literal("Config value set: " + key + " = " + value), true);
+
+        if (PterodactylCommandsConfig.validate()) {
+            source.sendSuccess(() -> Component.literal("All configurations are set correctly."), true);
+        }
+
         return 1;
     }
 
