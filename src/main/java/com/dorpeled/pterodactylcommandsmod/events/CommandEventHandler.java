@@ -1,5 +1,6 @@
 package com.dorpeled.pterodactylcommandsmod.events;
 
+import com.dorpeled.pterodactylcommandsmod.commands.ConfigCommands;
 import com.dorpeled.pterodactylcommandsmod.commands.HelpCommand;
 import com.mojang.logging.LogUtils;
 import net.minecraftforge.event.RegisterCommandsEvent;
@@ -14,6 +15,7 @@ public class CommandEventHandler {
     @SubscribeEvent
     public static void onRegisterCommands(RegisterCommandsEvent event) {
         HelpCommand.register(event.getDispatcher());
+        ConfigCommands.register(event.getDispatcher());
         LOGGER.info("Registered Command Event Handler");
     }
 }
