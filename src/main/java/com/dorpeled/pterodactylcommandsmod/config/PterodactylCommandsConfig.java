@@ -35,11 +35,8 @@ public class PterodactylCommandsConfig {
                 validateServerId(SERVER_ID.get());
 
         if (isValid) {
-            String url = PterodactylUrlBuilder.getInstance()
-                    .baseUrl(BASE_URL.get())
-                    .endpoint("/api/client/servers/")
-                    .param(SERVER_ID.get())
-                    .build();
+            String url = PterodactylUrlBuilder.getInstance().getServerUrl();
+            LOGGER.info("Validating configuration with URL: " + url);
 
             try {
                 HttpResponse<String> response = RestClient.sendGetRequest(url);

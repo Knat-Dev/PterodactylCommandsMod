@@ -1,5 +1,7 @@
 package com.dorpeled.pterodactylcommandsmod.util;
 
+import com.dorpeled.pterodactylcommandsmod.config.PterodactylCommandsConfig;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,6 +12,7 @@ public class PterodactylUrlBuilder {
     private List<String> params;
 
     private PterodactylUrlBuilder() {
+        this.baseUrl = PterodactylCommandsConfig.BASE_URL.get();
         params = new ArrayList<>();
     }
 
@@ -20,17 +23,12 @@ public class PterodactylUrlBuilder {
         return instance;
     }
 
-    public PterodactylUrlBuilder baseUrl(String baseUrl) {
-        this.baseUrl = baseUrl;
-        return this;
-    }
-
     public PterodactylUrlBuilder endpoint(String endpoint) {
         this.endpoint = endpoint;
         return this;
     }
 
-    public PterodactylUrlBuilder param(String param) {
+    public PterodactylUrlBuilder    param(String param) {
         this.params.add(param);
         return this;
     }
@@ -44,6 +42,31 @@ public class PterodactylUrlBuilder {
             urlBuilder.append(param);
         }
 
+        params.clear();
+        endpoint = null;
+
         return urlBuilder.toString();
+    }
+
+    public String getServerUrl() {
+        return this.endpoint("/api/client/servers")
+                .param(PterodactylCommandsConfig.SERVER_ID.get())
+                .build();
+    }
+
+    public String getScheduleListUrl() {
+        return this.endpoint("/api/client/servers")
+                .param(PterodactylCommandsConfig.SERVER_ID.get())
+                .param("schedules")
+                .build();
+    }
+
+    public String getScheduleExecuteUrl(String scheduleId) {
+        return this.endpoint("/api/client/servers")
+                .param(PterodactylCommandsConfig.SERVER_ID.get())
+                .param("schedules")
+                .param(scheduleId)
+                .param("execute")
+                .build();
     }
 }
