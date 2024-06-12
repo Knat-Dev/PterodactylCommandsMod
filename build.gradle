@@ -4,6 +4,7 @@ plugins {
     id 'net.minecraftforge.gradle' version '[6.0,6.2)'
     id 'org.parchmentmc.librarian.forgegradle' version '1.+'
     id 'com.github.johnrengelman.shadow' version '8.1.1'
+    id 'org.jetbrains.kotlin.jvm' version '2.0.0'
 }
 
 
@@ -142,10 +143,12 @@ dependencies {
     minecraftLibrary('com.fasterxml.jackson.core:jackson-databind:2.14.0')
     minecraftLibrary('com.fasterxml.jackson.core:jackson-annotations:2.14.0')
     minecraftLibrary('com.fasterxml.jackson.core:jackson-core:2.14.0')
+    minecraftLibrary('org.jetbrains.kotlin:kotlin-stdlib-jdk8')
 
     shade 'com.fasterxml.jackson.core:jackson-databind:2.14.0'
     shade 'com.fasterxml.jackson.core:jackson-annotations:2.14.0'
     shade 'com.fasterxml.jackson.core:jackson-core:2.14.0'
+    shade "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
 
     // Example mod dependency with JEI - using fg.deobf() ensures the dependency is remapped to your development mappings
     // The JEI API is declared for compile time use, while the full JEI artifact is used at runtime
@@ -224,6 +227,7 @@ shadowJar {
     archiveClassifier = ''
     configurations = [project.configurations.shade]
     relocate 'com.fasterxml.jackson.core', "${project.group}.com.example.jackson.core"
+    relocate 'org.jetbrains.kotlin', "${project.group}.org.jetbrains.kotlin"
     finalizedBy 'reobfShadowJar'
 }
 
@@ -231,4 +235,14 @@ assemble.dependsOn shadowJar
 
 reobf {
     shadowJar {}
+}
+compileKotlin {
+    kotlinOptions {
+        jvmTarget = "17"
+    }
+}
+compileTestKotlin {
+    kotlinOptions {
+        jvmTarget = "17"
+    }
 }

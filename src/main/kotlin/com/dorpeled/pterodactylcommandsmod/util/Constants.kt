@@ -1,7 +1,8 @@
-package com.dorpeled.pterodactylcommandsmod.util;
+package com.dorpeled.pterodactylcommandsmod.util
 
-public class Constants {
-    public static final String HELP_MESSAGE = """
+
+object Constants {
+    val HELP_MESSAGE: String = """
             Usage:
             /pterodactyl config setApiKey <apiKey>
             /pterodactyl config setBaseUrl <baseUrl>
@@ -10,5 +11,6 @@ public class Constants {
             /pterodactyl server_start <serverId>
             /pterodactyl server_stop <serverId>
             /pterodactyl server_restart <serverId>
-            """;
+            
+            """.trimIndent()
 }
