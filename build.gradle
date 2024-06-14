@@ -131,7 +131,6 @@ configurations {
     shade
     implementation.extendsFrom shade
     cleanedAnnotations
-
 }
 
 dependencies {
