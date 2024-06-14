@@ -1,10 +1,11 @@
-
 plugins {
     id 'eclipse'
     id 'idea'
     id 'net.minecraftforge.gradle' version '[6.0,6.2)'
     id 'org.parchmentmc.librarian.forgegradle' version '1.+'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
 }
+
 
 
 group = mod_group_id
@@ -122,6 +123,13 @@ repositories {
     // flatDir {
     //     dir 'libs'
     // }
+    mavenLocal()
+    mavenCentral()
+}
+
+configurations {
+    shade
+    implementation.extendsFrom shade
 }
 
 dependencies {
@@ -131,7 +139,13 @@ dependencies {
     // If the group id is "net.minecraft" and the artifact id is one of ["client", "server", "joined"],
     // then special handling is done to allow a setup of a vanilla dependency without the use of an external repository.
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.0'
+    minecraftLibrary('com.fasterxml.jackson.core:jackson-databind:2.14.0')
+    minecraftLibrary('com.fasterxml.jackson.core:jackson-annotations:2.14.0')
+    minecraftLibrary('com.fasterxml.jackson.core:jackson-core:2.14.0')
+
+    shade 'com.fasterxml.jackson.core:jackson-databind:2.14.0'
+    shade 'com.fasterxml.jackson.core:jackson-annotations:2.14.0'
+    shade 'com.fasterxml.jackson.core:jackson-core:2.14.0'
 
     // Example mod dependency with JEI - using fg.deobf() ensures the dependency is remapped to your development mappings
     // The JEI API is declared for compile time use, while the full JEI artifact is used at runtime
@@ -155,29 +169,30 @@ dependencies {
 // See https://docs.gradle.org/current/dsl/org.gradle.language.jvm.tasks.ProcessResources.html
 tasks.named('processResources', ProcessResources).configure {
     var replaceProperties = [
-            minecraft_version: minecraft_version, minecraft_version_range: minecraft_version_range,
-            forge_version: forge_version, forge_version_range: forge_version_range,
+            minecraft_version   : minecraft_version, minecraft_version_range: minecraft_version_range,
+            forge_version       : forge_version, forge_version_range: forge_version_range,
             loader_version_range: loader_version_range,
-            mod_id: mod_id, mod_name: mod_name, mod_license: mod_license, mod_version: mod_version,
-            mod_authors: mod_authors, mod_description: mod_description,
+            mod_id              : mod_id, mod_name: mod_name, mod_license: mod_license, mod_version: mod_version,
+            mod_authors         : mod_authors, mod_description: mod_description,
     ]
 
     inputs.properties replaceProperties
 
     filesMatching(['META-INF/mods.toml', 'pack.mcmeta']) {
         expand replaceProperties + [project: project]
-    }}
+    }
+}
 
 // Example for how to get properties into the manifest for reading at runtime.
 tasks.named('jar', Jar).configure {
     manifest {
         attributes([
-                "Specification-Title": mod_id,
-                "Specification-Vendor": mod_authors,
-                "Specification-Version": "1", // We are version 1 of ourselves
-                "Implementation-Title": project.name,
-                "Implementation-Version": project.jar.archiveVersion,
-                "Implementation-Vendor": mod_authors,
+                "Specification-Title"     : mod_id,
+                "Specification-Vendor"    : mod_authors,
+                "Specification-Version"   : "1", // We are version 1 of ourselves
+                "Implementation-Title"    : project.name,
+                "Implementation-Version"  : project.jar.archiveVersion,
+                "Implementation-Vendor"   : mod_authors,
                 "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
         ])
     }
@@ -188,4 +203,32 @@ tasks.named('jar', Jar).configure {
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
+}
+
+jar {
+    archiveClassifier = 'slim'
+    manifest {
+        attributes([
+                "Specification-Title"     : mod_id,
+                "Specification-Vendor"    : mod_authors,
+                "Specification-Version"   : "1", // We are version 1 of ourselves
+                "Implementation-Title"    : project.name,
+                "Implementation-Version"  : project.jar.archiveVersion,
+                "Implementation-Vendor"   : mod_authors,
+                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+        ])
+    }
+}
+
+shadowJar {
+    archiveClassifier = ''
+    configurations = [project.configurations.shade]
+    relocate 'com.fasterxml.jackson.core', "${project.group}.com.example.jackson.core"
+    finalizedBy 'reobfShadowJar'
+}
+
+assemble.dependsOn shadowJar
+
+reobf {
+    shadowJar {}
 }

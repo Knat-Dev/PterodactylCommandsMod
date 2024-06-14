@@ -37,7 +37,7 @@ public class RestClient {
         return getHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
     }
 
-    public HttpResponse<String> sendPostRequest(String url, String body) throws Exception {
+    public static HttpResponse<String> sendPostRequest(String url, String body) throws Exception {
         HttpRequest request = HttpRequest.newBuilder()
                 .POST(HttpRequest.BodyPublishers.ofString(body))
                 .uri(URI.create(url))
@@ -49,7 +49,7 @@ public class RestClient {
         return httpClient.send(request, HttpResponse.BodyHandlers.ofString());
     }
 
-    public HttpResponse<String> sendPutRequest(String url, String body) throws Exception {
+    public static HttpResponse<String> sendPutRequest(String url, String body) throws Exception {
         HttpRequest request = HttpRequest.newBuilder()
                 .PUT(HttpRequest.BodyPublishers.ofString(body))
                 .uri(URI.create(url))
@@ -61,7 +61,7 @@ public class RestClient {
         return httpClient.send(request, HttpResponse.BodyHandlers.ofString());
     }
 
-    public HttpResponse<String> sendDeleteRequest(String url) throws Exception {
+    public static HttpResponse<String> sendDeleteRequest(String url) throws Exception {
         HttpRequest request = HttpRequest.newBuilder()
                 .DELETE()
                 .uri(URI.create(url))
@@ -73,7 +73,7 @@ public class RestClient {
         return httpClient.send(request, HttpResponse.BodyHandlers.ofString());
     }
 
-    public HttpResponse<String> sendPatchRequest(String url, String body) throws Exception {
+    public static HttpResponse<String> sendPatchRequest(String url, String body) throws Exception {
         HttpRequest request = HttpRequest.newBuilder()
                 .method("PATCH", HttpRequest.BodyPublishers.ofString(body))
                 .uri(URI.create(url))
