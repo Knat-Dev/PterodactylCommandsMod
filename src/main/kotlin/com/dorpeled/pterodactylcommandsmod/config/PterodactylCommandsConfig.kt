@@ -13,10 +13,10 @@ import java.util.*
 object PterodactylCommandsConfig {
     private val LOGGER: Logger? = LogUtils.getLogger()
     private val BUILDER: ForgeConfigSpec.Builder = ForgeConfigSpec.Builder()
-    val config: ForgeConfigSpec;
-    val BASE_URL: ForgeConfigSpec.ConfigValue<String>;
-    val API_KEY: ForgeConfigSpec.ConfigValue<String>;
-    val SERVER_ID: ForgeConfigSpec.ConfigValue<String>;
+    val config: ForgeConfigSpec
+    val BASE_URL: ForgeConfigSpec.ConfigValue<String>
+    val API_KEY: ForgeConfigSpec.ConfigValue<String>
+    val SERVER_ID: ForgeConfigSpec.ConfigValue<String>
 
     init {
         BUILDER.push("General")
@@ -31,7 +31,7 @@ object PterodactylCommandsConfig {
         var isValid =
             validateBaseUrl(BASE_URL.get()) && validateApiKey(API_KEY.get()) && validateServerId(SERVER_ID.get())
         if (isValid) {
-            val url: String? = PterodactylUrlBuilder.getInstance()?.getServerUrl()
+            val url: String = PterodactylUrlBuilder.instance.getServerUrl()
             LOGGER?.info("Validating configuration with URL: $url")
             isValid = try {
                 val response: HttpResponse<String?>? = RestClient.sendGetRequest(url)

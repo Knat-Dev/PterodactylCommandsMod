@@ -20,8 +20,9 @@ class PterodactylCommandsMod {
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, PterodactylCommandsConfig.config)
         MinecraftForge.EVENT_BUS.register(CommandEventHandler)
         MinecraftForge.EVENT_BUS.register(OpAdminLoginHandler)
-        val modEventBus: IEventBus = FMLJavaModLoadingContext.get().modEventBus
-        modEventBus.register(ConfigEventHandler())
+        FMLJavaModLoadingContext.get().modEventBus.also {
+            it.register(ConfigEventHandler())
+        }
     }
 
     companion object {

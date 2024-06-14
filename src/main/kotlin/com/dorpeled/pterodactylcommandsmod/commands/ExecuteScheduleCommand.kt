@@ -18,67 +18,117 @@ import java.util.concurrent.CompletableFuture
 
 
 object ExecuteScheduleCommand {
-    private var schedule: Schedule? = null
     fun register(dispatcher: CommandDispatcher<CommandSourceStack?>?) {
         dispatcher?.register(
-            Commands.literal("pterodactyl")
-                .then(Commands.literal("execute_schedule")
-                    .then(Commands.argument("scheduleName", StringArgumentType.word())
-                        .suggests { context, builder -> getSuggestions(builder) }
-                        .executes(ExecuteScheduleCommand::executeSchedule)
-                    )
+            Commands.literal("pterodactyl").apply {
+                then(
+                    Commands.literal("execute_schedule").apply {
+                        then(
+                            Commands.argument("scheduleName", StringArgumentType.word())
+                                .suggests { _, builder -> getSuggestions(builder) }
+                                .executes(ExecuteScheduleCommand::executeSchedule)
+                        )
+                    }
                 )
+            }
         )
     }
 
     private fun getSuggestions(builder: SuggestionsBuilder?): CompletableFuture<Suggestions?>? {
-        val url: String? = PterodactylUrlBuilder.getInstance()?.getScheduleListUrl()
-
-        try {
-            val response: HttpResponse<String?>? = RestClient.sendGetRequest(url)
-            if (response?.statusCode() == HttpStatus.SC_OK) {
-                val mapper = ObjectMapper()
-                schedule = mapper.readValue(response.body(), Schedule::class.java)
-                val numberOfSchedules: Int = schedule?.getData()?.size ?: 0
-                if (numberOfSchedules == 0) {
-                    return CompletableFuture.completedFuture(builder?.build())
-                }
-                for (data in schedule?.getData()!!) {
-                    builder?.suggest(data?.getAttributes()?.getName()?.replace(" ", "_"))
-                }
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-        return CompletableFuture.completedFuture(builder?.build())
+        val url = PterodactylUrlBuilder.instance.getScheduleListUrl()
+        return ScheduleUtils.fetchScheduleData(url)
+            ?.let { ScheduleUtils.parseScheduleResponse(it) }
+            ?.let { ScheduleUtils.buildSuggestions(it, builder) }
+            ?: CompletableFuture.completedFuture(builder?.build())
     }
 
     private fun executeSchedule(context: CommandContext<CommandSourceStack?>?): Int {
-        val scheduleName: String = StringArgumentType.getString(context, "scheduleName")
-        var scheduleId: String? = ""
-        for (data in schedule?.getData()!!) {
-            if (data?.getAttributes()?.getName().equals(scheduleName.replace("_", " "))) {
-                scheduleId = data?.getAttributes()?.getId().toString()
-                break
-            }
+        val scheduleName = StringArgumentType.getString(context, "scheduleName").replace("_", " ")
+        val scheduleId = ScheduleUtils.getScheduleIdByName(scheduleName)
+            ?: return ScheduleUtils.handleFailure(context, "Schedule '$scheduleName' not found")
+
+        if (ScheduleUtils.scheduleHasPowerAction(scheduleId)) {
+            return ScheduleUtils.handleFailure(context, "Execution of schedules with power actions is not allowed")
         }
-        if (scheduleId.equals("")) {
-            context?.source?.sendFailure(Component.literal("Schedule not found"))
-            return 0
+
+        val url = PterodactylUrlBuilder.instance.getScheduleExecuteUrl(scheduleId)
+        val response = ScheduleUtils.executeScheduleCommand(url)
+
+        return when (response?.statusCode()) {
+            HttpStatus.SC_ACCEPTED -> ScheduleUtils.handleSuccess(context, scheduleName)
+            else -> ScheduleUtils.handleFailure(context, "Failed to execute schedule")
         }
-        val url: String? = PterodactylUrlBuilder.getInstance()?.getScheduleExecuteUrl(scheduleId)
+    }
+}
+
+
+private fun Schedule.ServerSchedule.hasPowerAction(): Boolean {
+    return this.getAttributes()?.getRelationships()?.getTasks()?.getData()
+        ?.any { it?.getAttributes()?.getAction() == "power" } == true
+}
+
+object ScheduleUtils {
+    private var schedule: Schedule? = null
+
+    fun fetchScheduleData(url: String): HttpResponse<String?>? {
         return try {
-            val response: HttpResponse<String?>? = RestClient.sendPostRequest(url, "\"{}\"")
-            if (response?.statusCode() == HttpStatus.SC_ACCEPTED) {
-                context?.getSource()?.sendSuccess({ Component.literal("Schedule executed successfully") }, false)
-                1
-            } else {
-                context?.getSource()?.sendFailure(Component.literal("Failed to execute schedule"))
-                0
-            }
+            RestClient.sendGetRequest(url)
         } catch (e: Exception) {
             e.printStackTrace()
-            0
+            null
         }
+    }
+
+    fun parseScheduleResponse(response: HttpResponse<String?>?): Schedule? {
+        return if (response == null) null else
+            when (response.statusCode()) {
+                HttpStatus.SC_OK -> ObjectMapper().readValue(response.body(), Schedule::class.java)
+                    .also { schedule = it }
+
+                else -> null
+            }
+    }
+
+    fun buildSuggestions(schedule: Schedule?, builder: SuggestionsBuilder?): CompletableFuture<Suggestions?>? {
+        schedule?.getData()
+            ?.filterNot { it?.hasPowerAction() ?: false }
+            ?.forEach { serverSchedule ->
+                val scheduleName: String? = serverSchedule?.getAttributes()?.getName()
+                builder?.suggest(scheduleName?.replace(" ", "_"))
+            }
+        return CompletableFuture.completedFuture(builder?.build())
+    }
+
+    fun getScheduleIdByName(scheduleName: String): String? {
+        return schedule?.getData()
+            ?.find { it?.getAttributes()?.getName().equals(scheduleName, ignoreCase = true) }
+            ?.getAttributes()
+            ?.getId()
+            ?.toString()
+    }
+
+    fun executeScheduleCommand(url: String): HttpResponse<String?>? {
+        return try {
+            RestClient.sendPostRequest(url, "\"{}\"")
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }
+
+    fun handleSuccess(context: CommandContext<CommandSourceStack?>?, scheduleName: String): Int {
+        context?.source?.sendSuccess({ Component.literal("Schedule '$scheduleName' executed successfully") }, false)
+        return 1
+    }
+
+    fun handleFailure(context: CommandContext<CommandSourceStack?>?, message: String): Int {
+        context?.source?.sendFailure(Component.literal(message))
+        return 0
+    }
+
+    fun scheduleHasPowerAction(scheduleId: String): Boolean {
+        return schedule?.getData()
+            ?.find { it?.getAttributes()?.getId().toString() == scheduleId }
+            ?.hasPowerAction() ?: false
     }
 }
