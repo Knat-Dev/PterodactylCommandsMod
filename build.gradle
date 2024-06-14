@@ -76,7 +76,7 @@ dependencies {
     minecraftLibrary('com.fasterxml.jackson.core:jackson-databind:2.14.0')
     minecraftLibrary('com.fasterxml.jackson.core:jackson-annotations:2.14.0')
     minecraftLibrary "org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.0.0"
-    minecraftLibrary 'org.jetbrains:annotations:24.0.1'
+    minecraftLibrary 'org.jetbrains:annotations:23.0.0'
 
     shade 'com.fasterxml.jackson.core:jackson-databind:2.14.0'
     shade 'com.fasterxml.jackson.core:jackson-annotations:2.14.0'
