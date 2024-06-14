@@ -18,7 +18,7 @@ import java.util.concurrent.CompletableFuture
 
 
 object ExecuteScheduleCommand {
-    var schedule: Schedule? = null
+    private var schedule: Schedule? = null
     fun register(dispatcher: CommandDispatcher<CommandSourceStack?>?) {
         dispatcher?.register(
             Commands.literal("pterodactyl")
@@ -33,6 +33,7 @@ object ExecuteScheduleCommand {
 
     private fun getSuggestions(builder: SuggestionsBuilder?): CompletableFuture<Suggestions?>? {
         val url: String? = PterodactylUrlBuilder.getInstance()?.getScheduleListUrl()
+
         try {
             val response: HttpResponse<String?>? = RestClient.sendGetRequest(url)
             if (response?.statusCode() == HttpStatus.SC_OK) {
@@ -43,7 +44,7 @@ object ExecuteScheduleCommand {
                     return CompletableFuture.completedFuture(builder?.build())
                 }
                 for (data in schedule?.getData()!!) {
-                    builder?.suggest(data?.getAttributes()?.getName()?.replace("\\s+", "_"))
+                    builder?.suggest(data?.getAttributes()?.getName()?.replace(" ", "_"))
                 }
             }
         } catch (e: Exception) {

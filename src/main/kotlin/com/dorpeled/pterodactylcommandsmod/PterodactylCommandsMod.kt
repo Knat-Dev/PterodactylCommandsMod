@@ -13,15 +13,14 @@ import net.minecraftforge.fml.config.ModConfig
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext
 import org.slf4j.Logger
 
-
 @Mod(PterodactylCommandsMod.MODID)
 class PterodactylCommandsMod {
     init {
         LOGGER.info("Starting Pterodactyl Commands")
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, PterodactylCommandsConfig.config)
-        MinecraftForge.EVENT_BUS.register(CommandEventHandler::class.java)
-        MinecraftForge.EVENT_BUS.register(OpAdminLoginHandler::class.java)
-        val modEventBus: IEventBus = FMLJavaModLoadingContext.get().getModEventBus()
+        MinecraftForge.EVENT_BUS.register(CommandEventHandler)
+        MinecraftForge.EVENT_BUS.register(OpAdminLoginHandler)
+        val modEventBus: IEventBus = FMLJavaModLoadingContext.get().modEventBus
         modEventBus.register(ConfigEventHandler())
     }
 

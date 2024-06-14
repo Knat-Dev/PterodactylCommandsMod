@@ -14,6 +14,7 @@ object CommandEventHandler {
     private val LOGGER: Logger? = LogUtils.getLogger()
     @SubscribeEvent
     fun onRegisterCommands(event: RegisterCommandsEvent?) {
+        LOGGER?.info("Registering Command Event Handler")
         HelpCommand.register(event?.dispatcher)
         ConfigCommands.register(event?.dispatcher)
         ExecuteScheduleCommand.register(event?.dispatcher)

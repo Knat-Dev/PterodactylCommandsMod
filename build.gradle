@@ -7,8 +7,6 @@ plugins {
     id 'org.jetbrains.kotlin.jvm' version '2.0.0'
 }
 
-
-
 group = mod_group_id
 version = mod_version
 
@@ -95,6 +93,7 @@ minecraft {
             args '--nogui'
         }
 
+
         // This run config launches GameTestServer and runs all registered gametests, then exits.
         // By default, the server will crash when no gametests are provided.
         // The gametest system is also enabled by default for other run configs under the /test command.
@@ -131,6 +130,8 @@ repositories {
 configurations {
     shade
     implementation.extendsFrom shade
+    cleanedAnnotations
+
 }
 
 dependencies {
@@ -139,16 +140,18 @@ dependencies {
     // The "userdev" classifier will be requested and setup by ForgeGradle.
     // If the group id is "net.minecraft" and the artifact id is one of ["client", "server", "joined"],
     // then special handling is done to allow a setup of a vanilla dependency without the use of an external repository.
+
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
     minecraftLibrary('com.fasterxml.jackson.core:jackson-databind:2.14.0')
+    minecraftLibrary('com.fasterxml.jackson.core:jackson-databind:2.14.0')
     minecraftLibrary('com.fasterxml.jackson.core:jackson-annotations:2.14.0')
-    minecraftLibrary('com.fasterxml.jackson.core:jackson-core:2.14.0')
-    minecraftLibrary('org.jetbrains.kotlin:kotlin-stdlib-jdk8')
+    minecraftLibrary "org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.0.0"
+    minecraftLibrary 'org.jetbrains:annotations:23.0.0'
 
     shade 'com.fasterxml.jackson.core:jackson-databind:2.14.0'
     shade 'com.fasterxml.jackson.core:jackson-annotations:2.14.0'
     shade 'com.fasterxml.jackson.core:jackson-core:2.14.0'
-    shade "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+    shade "org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.0.0"
 
     // Example mod dependency with JEI - using fg.deobf() ensures the dependency is remapped to your development mappings
     // The JEI API is declared for compile time use, while the full JEI artifact is used at runtime
@@ -236,11 +239,13 @@ assemble.dependsOn shadowJar
 reobf {
     shadowJar {}
 }
+
 compileKotlin {
     kotlinOptions {
         jvmTarget = "17"
     }
 }
+
 compileTestKotlin {
     kotlinOptions {
         jvmTarget = "17"

@@ -5,29 +5,25 @@ import com.dorpeled.pterodactylcommandsmod.config.PterodactylCommandsConfig
 
 class PterodactylUrlBuilder private constructor() {
     private val baseUrl: String? = PterodactylCommandsConfig.BASE_URL.get()
-    private var endpoint: String? = "\"/api/client/servers\""
-    private val params: ArrayList<String?>?
+    private var endpoint: String? = "/api/client/servers"
+    private val params: ArrayList<String?> = ArrayList()
 
-    init {
-        params = ArrayList()
-    }
+
+
 
     private fun param(param: String?): PterodactylUrlBuilder {
-        params?.add(param)
+        params.add(param)
         return this
     }
 
     private fun build(): String {
         val urlBuilder = StringBuilder(baseUrl)
         urlBuilder.append(endpoint)
-        if (params != null) {
-            for (param in params) {
+        for (param in params) {
                 urlBuilder.append("/")
                 urlBuilder.append(param)
             }
-        }
-        params?.clear()
-        endpoint = null
+        params.clear()
         return urlBuilder.toString()
     }
 
