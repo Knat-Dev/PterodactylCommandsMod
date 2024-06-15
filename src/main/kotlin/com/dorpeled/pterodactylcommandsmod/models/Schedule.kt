@@ -397,5 +397,11 @@ class Schedule {
                 }
             }
         }
+
+        fun hasPowerAction(): Boolean {
+            return this.getAttributes()?.getRelationships()?.getTasks()?.getData()
+                ?.any { it?.getAttributes()?.getAction() == "power" } == true
+        }
+
     }
 }

@@ -44,7 +44,7 @@ object PterodactylCommandsConfig {
         return isValid
     }
 
-    private fun validateBaseUrl(baseUrl: String?): Boolean {
+    fun validateBaseUrl(baseUrl: String?): Boolean {
         if (baseUrl != null) {
             if (baseUrl.isEmpty()) {
                 LOGGER?.error("Base URL is missing. Please check your configuration file.")

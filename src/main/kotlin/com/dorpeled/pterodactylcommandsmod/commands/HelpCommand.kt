@@ -19,8 +19,7 @@ object HelpCommand {
     }
 
     private fun executeHelp(context: CommandContext<CommandSourceStack?>?): Int {
-        val source: CommandSourceStack? = context?.source
-        source?.sendSuccess({ Constants.HELP_MESSAGE?.let { Component.literal(it) } }, false)
+        context?.source?.sendSuccess({ Component.literal(Constants.HELP_MESSAGE) }, false)
         return 1
     }
 }
