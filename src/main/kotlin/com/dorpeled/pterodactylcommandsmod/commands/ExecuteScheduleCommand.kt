@@ -1,7 +1,7 @@
 package com.dorpeled.pterodactylcommandsmod.commands
 
-import com.dorpeled.pterodactylcommandsmod.util.ScheduleUtils
 import com.dorpeled.pterodactylcommandsmod.util.PterodactylUrlBuilder
+import com.dorpeled.pterodactylcommandsmod.util.ScheduleUtils
 import com.mojang.brigadier.CommandDispatcher
 import com.mojang.brigadier.arguments.StringArgumentType
 import com.mojang.brigadier.context.CommandContext
@@ -29,7 +29,9 @@ object ExecuteScheduleCommand {
         )
     }
 
-    private fun getSuggestions(builder: SuggestionsBuilder?): CompletableFuture<Suggestions?>? {
+    private fun getSuggestions(
+        builder: SuggestionsBuilder?
+    ): CompletableFuture<Suggestions?> {
         val url = PterodactylUrlBuilder.instance.getScheduleListUrl()
         return ScheduleUtils.fetchScheduleData(url)
             ?.let { response -> ScheduleUtils.parseScheduleResponse(response) }
@@ -37,7 +39,7 @@ object ExecuteScheduleCommand {
             ?: CompletableFuture.completedFuture(builder?.build())
     }
 
-    private fun executeSchedule(context: CommandContext<CommandSourceStack?>?): Int {
+    private fun executeSchedule(context: CommandContext<CommandSourceStack>): Int {
         val scheduleName = StringArgumentType.getString(context, "scheduleName").replace("_", " ")
         val scheduleId = ScheduleUtils.getScheduleIdByName(scheduleName)
             ?: return ScheduleUtils.handleFailure(context, "Schedule '$scheduleName' not found")

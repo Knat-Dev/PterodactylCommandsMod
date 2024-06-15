@@ -24,14 +24,13 @@ object ScheduleUtils {
         }
     }
 
-    fun parseScheduleResponse(response: HttpResponse<String?>?): Schedule? {
-        return if (response == null) null else
-            when (response.statusCode()) {
-                HttpStatus.SC_OK -> ObjectMapper().readValue(response.body(), Schedule::class.java)
-                    .also { schedule = it }
+    fun parseScheduleResponse(response: HttpResponse<String?>): Schedule? {
+        return when (response.statusCode()) {
+            HttpStatus.SC_OK -> ObjectMapper().readValue(response.body(), Schedule::class.java)
+                .also { schedule -> this.schedule = schedule }
 
-                else -> null
-            }
+            else -> null
+        }
     }
 
     fun buildSuggestions(schedule: Schedule?, builder: SuggestionsBuilder?): CompletableFuture<Suggestions?>? {
@@ -61,13 +60,13 @@ object ScheduleUtils {
         }
     }
 
-    fun handleSuccess(context: CommandContext<CommandSourceStack?>?, scheduleName: String): Int {
-        context?.source?.sendSuccess({ Component.literal("Schedule '$scheduleName' executed successfully") }, false)
+    fun handleSuccess(context: CommandContext<CommandSourceStack>, scheduleName: String): Int {
+        context.source?.sendSuccess({ Component.literal("Schedule '$scheduleName' executed successfully") }, false)
         return 1
     }
 
-    fun handleFailure(context: CommandContext<CommandSourceStack?>?, message: String): Int {
-        context?.source?.sendFailure(Component.literal(message))
+    fun handleFailure(context: CommandContext<CommandSourceStack>, message: String): Int {
+        context.source?.sendFailure(Component.literal(message))
         return 0
     }
 
