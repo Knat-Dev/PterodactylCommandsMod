@@ -6,7 +6,6 @@ import net.minecraftforge.eventbus.api.SubscribeEvent
 import net.minecraftforge.fml.event.config.ModConfigEvent
 import org.slf4j.Logger
 
-
 class ConfigEventHandler {
     @SubscribeEvent
     fun onConfigLoad(configEvent: ModConfigEvent.Loading?) {

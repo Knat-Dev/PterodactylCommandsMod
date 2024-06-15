@@ -17,7 +17,7 @@ object OpAdminLoginHandler {
     fun onPlayerLogin(event: PlayerEvent.PlayerLoggedInEvent?) {
         val player: Player? = event?.entity
         if (player?.hasPermissions(4) == true) {
-            LOGGER?.info("An op admin has logged in: {}", player.name.string)
+            LOGGER?.info("An op admin has logged in: {}, uuid: {}", player.name.string, player.uuid)
             if (!PterodactylCommandsConfig.validate()) {
                 val message = "Configuration is not set or invalid. /help for more info."
                 LOGGER?.error(message)

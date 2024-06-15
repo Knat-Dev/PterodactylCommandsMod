@@ -12,6 +12,7 @@ import org.slf4j.Logger
 @Mod.EventBusSubscriber
 object CommandEventHandler {
     private val LOGGER: Logger? = LogUtils.getLogger()
+
     @SubscribeEvent
     fun onRegisterCommands(event: RegisterCommandsEvent?) {
         LOGGER?.info("Registering Command Event Handler")
