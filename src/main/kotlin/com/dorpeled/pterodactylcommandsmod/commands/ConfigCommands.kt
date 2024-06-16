@@ -35,7 +35,7 @@ object ConfigCommands {
     }
 
     private fun suggestConfigKeys(builder: SuggestionsBuilder): CompletableFuture<Suggestions> {
-        ConfigKey.entries.forEach { builder.suggest(it.toString()) }
+        ConfigKey.entries.forEach { entry -> builder.suggest(entry.toString()) }
         return builder.buildFuture()
     }
 
@@ -78,7 +78,7 @@ object ConfigCommands {
         source: CommandSourceStack,
         key: String,
         value: String,
-        validator: (String) -> Boolean,
+        validator: (String?) -> Boolean,
         config: ForgeConfigSpec.ConfigValue<String>
     ): Int {
         if (!validator(value)) {
@@ -86,11 +86,14 @@ object ConfigCommands {
             source.sendFailure(Component.literal("$key is not valid."))
             return 0
         }
+
         config.set(value)
         source.sendSuccess({ Component.literal("Config value set: $key = $value") }, true)
+
         if (PterodactylCommandsConfig.validate()) {
             source.sendSuccess({ Component.literal("All configurations are set correctly.") }, true)
         }
+
         return 1
     }
 }
