@@ -1,8 +1,11 @@
 package com.dorpeled.pterodactylcommandsmod.util
 
-import com.dorpeled.pterodactylcommandsmod.models.Schedule
+import com.dorpeled.pterodactylcommandsmod.models.ServerScheduleList
+import com.dorpeled.pterodactylcommandsmod.models.ServerScheduleWrapper
 import com.dorpeled.pterodactylcommandsmod.network.RestClient
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.readValue
 import com.mojang.brigadier.context.CommandContext
 import com.mojang.brigadier.suggestion.Suggestions
 import com.mojang.brigadier.suggestion.SuggestionsBuilder
@@ -13,7 +16,10 @@ import java.net.http.HttpResponse
 import java.util.concurrent.CompletableFuture
 
 object ScheduleUtils {
-    private var schedule: Schedule? = null
+    private var serverScheduleList: ServerScheduleList? = null
+    private val objectMapper = ObjectMapper().apply {
+        registerModule(JavaTimeModule())
+    }
 
     fun fetchScheduleData(url: String): HttpResponse<String?>? {
         return try {
@@ -24,30 +30,37 @@ object ScheduleUtils {
         }
     }
 
-    fun parseScheduleResponse(response: HttpResponse<String?>): Schedule? {
+    fun parseScheduleResponse(response: HttpResponse<String?>): ServerScheduleList? {
         return when (response.statusCode()) {
-            HttpStatus.SC_OK -> ObjectMapper().readValue(response.body(), Schedule::class.java)
-                .also { schedule -> this.schedule = schedule }
+            HttpStatus.SC_OK -> response.body()?.let {
+                objectMapper.readValue<ServerScheduleList>(it).also { serverScheduleList ->
+                    this.serverScheduleList = serverScheduleList
+                }
+            }
 
             else -> null
+
         }
     }
 
-    fun buildSuggestions(schedule: Schedule?, builder: SuggestionsBuilder?): CompletableFuture<Suggestions?>? {
-        schedule?.getData()
-            ?.filterNot { it?.hasPowerAction() ?: false }
+    fun buildSuggestions(
+        schedule: ServerScheduleList?,
+        builder: SuggestionsBuilder?
+    ): CompletableFuture<Suggestions?>? {
+        schedule?.data
+            ?.filterNot { it.hasPowerAction() }
             ?.forEach { serverSchedule ->
-                val scheduleName: String? = serverSchedule?.getAttributes()?.getName()
-                builder?.suggest(scheduleName?.replace(" ", "_"))
+                val scheduleName: String = serverSchedule.attributes.name
+                builder?.suggest(scheduleName.replace(" ", "_"))
             }
         return CompletableFuture.completedFuture(builder?.build())
     }
 
     fun getScheduleIdByName(scheduleName: String): String? {
-        return schedule?.getData()
-            ?.find { it?.getAttributes()?.getName().equals(scheduleName, ignoreCase = true) }
-            ?.getAttributes()
-            ?.getId()
+        return serverScheduleList?.data
+            ?.find { it.attributes.name.equals(scheduleName, ignoreCase = true) }
+            ?.attributes
+            ?.id
             ?.toString()
     }
 
@@ -71,8 +84,8 @@ object ScheduleUtils {
     }
 
     fun scheduleHasPowerAction(scheduleId: String): Boolean {
-        return schedule?.getData()
-            ?.find { it?.getAttributes()?.getId().toString() == scheduleId }
+        return serverScheduleList?.data
+            ?.find { it.attributes.id.toString() == scheduleId }
             ?.hasPowerAction() ?: false
     }
 }
